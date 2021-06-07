@@ -1,11 +1,30 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/pages/add.dart';
 import 'package:flutter_application/pages/mypage.dart';
 import 'package:flutter_application/pages/settings.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // ここ大事！
   runApp(MyApp());
+}
+
+class TopPageApp extends StatefulWidget{
+  TopPageApp(this.user);
+  final User user;
+  @override
+  _TopPageApp createState() => _TopPageApp();
+}
+
+class _TopPageApp extends State<TopPageApp>{
+
+  @override
+  Widget build(BuildContext context) {
+    throw UnimplementedError();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -54,12 +73,22 @@ class _MyHomePageState extends State<MyHomePage> {
     ),
     MyPage() ,
     //ページ4
-    SettingsPage() ,
+    SettingsPage(),
   ];
 
 
   @override
   Widget build(BuildContext context) {
+    FirebaseAuth.instance.authStateChanges().listen(
+      (User? user) { 
+        if (user == null) {
+          print('User is currently signed out!');
+        } else {
+          print('User is signed in!');
+          print(user.email);
+        }
+      }
+      );
     return Scaffold(
       appBar: AppBar(
       title: const Text('Title',

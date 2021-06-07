@@ -1,29 +1,36 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/main.dart';
+import 'package:flutter_application/pages/mypage.dart';
 
-import 'login.dart';
+import 'add.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // ここ大事！
-  runApp(MyPage());
+  runApp(LoginPage());
 }
 
-class MyPage extends StatefulWidget{
-  SignInPage createState()=> SignInPage();
+class LoginPage extends StatefulWidget{
+  Login createState()=> Login();
 }
 
-class SignInPage extends State<MyPage>{
+class Login extends State<LoginPage>{
   // 入力されたメールアドレス
-  String newUserEmail = "";
+  String email = "";
   // 入力されたパスワード
-  String newUserPassword = "";
+  String password = "";
   // 登録・ログインに関する情報を表示
   String infoText = "";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Login',
+              style: TextStyle(color:Colors.black),
+        ),
+      ),
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         padding: EdgeInsets.only(left: 10.0,right: 10.0),
@@ -38,7 +45,7 @@ class SignInPage extends State<MyPage>{
                   ),
                 onChanged: (String value){
                   setState((){
-                    newUserEmail = value;
+                    email = value;
                   });
                 },
               ),
@@ -52,7 +59,7 @@ class SignInPage extends State<MyPage>{
                   ),
                 onChanged: (String value) {
                   setState(() {
-                    newUserPassword = value;
+                    password = value;
                   });
                 },
               ),
@@ -60,59 +67,34 @@ class SignInPage extends State<MyPage>{
                 onPressed: () async {
                   try{
                     final FirebaseAuth auth = FirebaseAuth.instance;
-                    final result = await auth.createUserWithEmailAndPassword(email: newUserEmail, password: newUserPassword);
-                    await Navigator.of(
-                      context
-                      ).pushReplacement(MaterialPageRoute(builder: (context){
-                        return MyAccountPage(result.user!);
-                      }),
+                    final result = await auth.signInWithEmailAndPassword(
+                      email: email, 
+                      password: password,
+                    );
+                    await Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => MyApp(),
+                      ),
                     );
                   } catch(e) {
                     setState((){
-                    infoText = '登録に失敗しました：${e.toString()}';
+                    infoText = 'ログインに失敗しました';
                     });
                   }
                 },
                 child:
-                  Text('Signin'),
+                  Text('Login'),
               ),
               const SizedBox(height:8),
               Text(infoText),
-              ElevatedButton(
-                onPressed: (){
-                },
-                child: Text('Sign in Google')
-              ),
-              TextButton(
-                onPressed: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage(),
-                    )
-                  );
-                },
-                child: Text('ログイン画面へ')
-              ),
+              IconButton(onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+              },
+               icon: Icon(Icons.logout),
+              )
             ],
           ),
         ),
       ),
     );
   }
-}
-
-class MyAccountPage extends StatelessWidget{
-
-  MyAccountPage(this.user);
-  final User user;
-
-  @override
-  Widget build(BuildContext context){
-    // TODO: implement createState
-    return Scaffold(
-      body:Center(child: Text('ログイン情報:${user.email}'),
-      ),
-    );
-  }
-  
 }
