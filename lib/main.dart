@@ -63,16 +63,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   List<Widget> _widgetOptions = <Widget>[
     HomePage() ,
-    Text(
-      'Add',
-      style: optionStyle,
-    ),
+    HomePage() ,
     MyPage() ,
-    //ページ4
     SettingsPage(),
   ];
 
@@ -96,6 +90,14 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       elevation: 0.0,
       backgroundColor: Colors.white.withOpacity(0.9),
+      centerTitle: true,
+      actions: <Widget>[
+        IconButton(onPressed: () async {
+          await FirebaseAuth.instance.signOut();
+        },
+          icon: Icon(Icons.logout,color: Colors.black,),
+        ),
+      ],
       ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),

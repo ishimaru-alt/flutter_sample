@@ -1,38 +1,34 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/main.dart';
-
-import 'signin.dart';
+import 'login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // ここ大事！
-  runApp(LoginPage());
+  runApp(SignInPage());
 }
 
-class LoginPage extends StatefulWidget{
-  Login createState()=> Login();
+class SignInPage extends StatefulWidget{
+  SignIn createState()=> SignIn();
 }
 
-class Login extends State<LoginPage>{
+class SignIn extends State<SignInPage>{
   // 入力されたメールアドレス
-  String email = "";
+  String newUserEmail = "";
   // 入力されたパスワード
-  String password = "";
+  String newUserPassword = "";
   // 登録・ログインに関する情報を表示
   String infoText = "";
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Login',
+        title: const Text('Sign in',
               style: TextStyle(color:Colors.black),
         ),
-      automaticallyImplyLeading: false,
       ),
-      resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         padding: EdgeInsets.only(left: 10.0,right: 10.0),
         child: Center(
@@ -46,7 +42,7 @@ class Login extends State<LoginPage>{
                   ),
                 onChanged: (String value){
                   setState((){
-                    email = value;
+                    newUserEmail = value;
                   });
                 },
               ),
@@ -60,7 +56,7 @@ class Login extends State<LoginPage>{
                   ),
                 onChanged: (String value) {
                   setState(() {
-                    password = value;
+                    newUserPassword = value;
                   });
                 },
               ),
@@ -68,49 +64,32 @@ class Login extends State<LoginPage>{
                 onPressed: () async {
                   try{
                     final FirebaseAuth auth = FirebaseAuth.instance;
-                    final result = await auth.signInWithEmailAndPassword(
-                      email: email, 
-                      password: password,
-                    );
-                    await Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => MyApp(),
-                      ),
-                    );
+                    final result = await auth.createUserWithEmailAndPassword(email: newUserEmail, password: newUserPassword);
                   } catch(e) {
                     setState((){
-                    infoText = 'ログインに失敗しました';
+                    infoText = '登録に失敗しました：${e.toString()}';
                     });
                   }
                 },
                 child:
-                  Text('Login'),
-              ),
-              TextButton(
-                onPressed: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignInPage(),
-                    )
-                  );
-                },
-                child: Text('新規登録画面へ')
-              ),
-              TextButton(
-                onPressed: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignInPage(),
-                    )
-                  );
-                },
-                child: Text('トップ画面へ')
+                  Text('Signin'),
               ),
               const SizedBox(height:8),
               Text(infoText),
-              IconButton(onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-              },
-               icon: Icon(Icons.logout),
+              ElevatedButton(
+                onPressed: (){
+                },
+                child: Text('Sign in Google')
+              ),
+              TextButton(
+                onPressed: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage(),
+                    )
+                  );
+                },
+                child: Text('ログイン画面へ')
               ),
             ],
           ),

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_application/main.dart';
 import 'login.dart';
 
 void main() async {
@@ -15,14 +15,22 @@ class MyPage extends StatefulWidget{
 }
 
 class SignInPage extends State<MyPage>{
-  // 入力されたメールアドレス
-  String newUserEmail = "";
-  // 入力されたパスワード
-  String newUserPassword = "";
-  // 登録・ログインに関する情報を表示
-  String infoText = "";
   @override
   Widget build(BuildContext context) {
+    FirebaseAuth.instance.authStateChanges().listen(
+      (User? user) { 
+        if (user == null) {
+          print('ログインしているユーザーはいません');
+          Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (context) => LoginPage(),
+          ));
+        } else {
+          print('ログインしてるよ(≧◇≦)');
+          print(user.email);
+        }
+      }
+      );
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
@@ -30,68 +38,9 @@ class SignInPage extends State<MyPage>{
         child: Center(
           child: Column(
             children: <Widget>[
-              TextFormField(
-                // 入力数
-                maxLength: 102,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  ),
-                onChanged: (String value){
-                  setState((){
-                    newUserEmail = value;
-                  });
-                },
-              ),
-              TextField(
-                //パスワードの場合
-                obscureText: true,
-                // 入力数
-                maxLength: 10,
-                decoration: InputDecoration(
-                  labelText: 'Password' ,
-                  ),
-                onChanged: (String value) {
-                  setState(() {
-                    newUserPassword = value;
-                  });
-                },
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  try{
-                    final FirebaseAuth auth = FirebaseAuth.instance;
-                    final result = await auth.createUserWithEmailAndPassword(email: newUserEmail, password: newUserPassword);
-                    await Navigator.of(
-                      context
-                      ).pushReplacement(MaterialPageRoute(builder: (context){
-                        return MyAccountPage(result.user!);
-                      }),
-                    );
-                  } catch(e) {
-                    setState((){
-                    infoText = '登録に失敗しました：${e.toString()}';
-                    });
-                  }
-                },
-                child:
-                  Text('Signin'),
-              ),
-              const SizedBox(height:8),
-              Text(infoText),
-              ElevatedButton(
-                onPressed: (){
-                },
-                child: Text('Sign in Google')
-              ),
               TextButton(
-                onPressed: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage(),
-                    )
-                  );
-                },
-                child: Text('ログイン画面へ')
+                onPressed: (){},
+                child:Text('ログイン'), 
               ),
             ],
           ),
@@ -99,20 +48,4 @@ class SignInPage extends State<MyPage>{
       ),
     );
   }
-}
-
-class MyAccountPage extends StatelessWidget{
-
-  MyAccountPage(this.user);
-  final User user;
-
-  @override
-  Widget build(BuildContext context){
-    // TODO: implement createState
-    return Scaffold(
-      body:Center(child: Text('ログイン情報:${user.email}'),
-      ),
-    );
-  }
-  
 }
